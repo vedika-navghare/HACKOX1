@@ -77,12 +77,16 @@ def load_data():
 def load_model():
     return joblib.load(MODEL_FILE)
 
-
 try:
     df = load_data()
+except Exception as exc:
+    st.error(f"DATASET ERROR: {type(exc).__name__}: {exc!r}")
+    st.stop()
+
+try:
     saved = load_model()
 except Exception as exc:
-    st.error(f"Unable to load project files: {exc}")
+    st.error(f"MODEL ERROR: {type(exc).__name__}: {exc!r}")
     st.stop()
 
 # Support either a saved bundle or a bare sklearn pipeline.
