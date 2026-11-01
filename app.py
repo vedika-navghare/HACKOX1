@@ -401,82 +401,42 @@ elif page == "GIS Hotspots":
         "and chainage-to-GPS mapping."
     )
 
+    
     st.subheader("📍 Your Current Location")
 
     if st.button("Find My Location"):
         st.session_state["request_location"] = True
 
- if st.session_state.get("request_location", False):
-    location = get_geolocation()
-
-    if isinstance(location, dict) and "error" in location:
-        error = location.get("error", {})
-        code = error.get("code")
-
-        if code == 1:
-            st.warning(
-                "Location permission denied. "
-                "Allow location access in your browser settings."
-            )
-        elif code == 2:
-            st.warning(
-                "Location unavailable. Turn on GPS and try again."
-            )
-        elif code == 3:
-            st.warning(
-                "Location request timed out. Please try again."
-            )
-        else:
-            st.warning(
-                error.get("message", "Unable to detect location.")
-            )
-
-    elif isinstance(location, dict):
-        coords = location.get("coords")
-
-        if isinstance(coords, dict):
-            latitude = coords.get("latitude")
-            longitude = coords.get("longitude")
-
-            if latitude is not None and longitude is not None:
-                latitude = float(latitude)
-                longitude = float(longitude)
-
-                st.success(
-                    f"Location found: {latitude:.5f}, {longitude:.5f}"
-                )
-
-                st.session_state["user_lat"] = latitude
-                st.session_state["user_lon"] = longitude
-            else:
-                st.info("Location data is not available yet. Try again.")
-        else:
-            st.warning("Unable to read location coordinates. Try again.")
-
-    else:
-        st.info(
-            "Waiting for location permission. "
-            "Please allow location access in your browser."
-        )
+    if st.session_state.get("request_location", False):
         location = get_geolocation()
 
-        if location:
-            latitude = location["coords"]["latitude"]
-            longitude = location["coords"]["longitude"]
+        if isinstance(location, dict):
+            coords = location.get("coords")
 
-            st.success(
-                f"Location found: {latitude:.5f}, {longitude:.5f}"
-            )
+            if isinstance(coords, dict):
+                latitude = coords.get("latitude")
+                longitude = coords.get("longitude")
 
-            # Save coordinates for map centering
-            st.session_state["user_lat"] = latitude
-            st.session_state["user_lon"] = longitude
+                if latitude is not None and longitude is not None:
+                    latitude = float(latitude)
+                    longitude = float(longitude)
+
+                    st.success(
+                        f"Location found: {latitude:.5f}, {longitude:.5f}"
+                    )
+
+                    st.session_state["user_lat"] = latitude
+                    st.session_state["user_lon"] = longitude
+                else:
+                    st.warning("Location coordinates are unavailable.")
+            elif location.get("error"):
+                st.warning(
+                    "Location access failed. Check your browser permissions."
+                )
+            else:
+                st.info("Waiting for location permission. Please try again.")
         else:
-            st.info(
-                "Waiting for location permission. "
-                "Allow location access in your browser."
-            )
-
+            st.info("Waiting for location permission. Please try again.")
     # Demonstration map centered on Nagpur (or the user's location)
     user_lat = st.session_state.get("user_lat", 21.1458)
     user_lon = st.session_state.get("user_lon", 79.0882)
