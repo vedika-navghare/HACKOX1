@@ -75,6 +75,12 @@ def load_data():
 
 @st.cache_resource
 def load_model():
+    with open(MODEL_FILE, "rb") as f:
+        header = f.read(100)
+
+    if header.startswith(b"version https://git-lfs"):
+        raise RuntimeError("Git LFS pointer detected instead of actual model file")
+
     return joblib.load(MODEL_FILE)
 
 try:
