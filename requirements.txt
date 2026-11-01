@@ -7,4 +7,4 @@ plotly
 folium
 streamlit-folium
 joblib
-streamlit-js-eval
+streamlit_js_eval==1.0.0
