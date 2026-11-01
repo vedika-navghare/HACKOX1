@@ -406,7 +406,58 @@ elif page == "GIS Hotspots":
     if st.button("Find My Location"):
         st.session_state["request_location"] = True
 
-    if st.session_state.get("request_location", False):
+ if st.session_state.get("request_location", False):
+    location = get_geolocation()
+
+    if isinstance(location, dict) and "error" in location:
+        error = location.get("error", {})
+        code = error.get("code")
+
+        if code == 1:
+            st.warning(
+                "Location permission denied. "
+                "Allow location access in your browser settings."
+            )
+        elif code == 2:
+            st.warning(
+                "Location unavailable. Turn on GPS and try again."
+            )
+        elif code == 3:
+            st.warning(
+                "Location request timed out. Please try again."
+            )
+        else:
+            st.warning(
+                error.get("message", "Unable to detect location.")
+            )
+
+    elif isinstance(location, dict):
+        coords = location.get("coords")
+
+        if isinstance(coords, dict):
+            latitude = coords.get("latitude")
+            longitude = coords.get("longitude")
+
+            if latitude is not None and longitude is not None:
+                latitude = float(latitude)
+                longitude = float(longitude)
+
+                st.success(
+                    f"Location found: {latitude:.5f}, {longitude:.5f}"
+                )
+
+                st.session_state["user_lat"] = latitude
+                st.session_state["user_lon"] = longitude
+            else:
+                st.info("Location data is not available yet. Try again.")
+        else:
+            st.warning("Unable to read location coordinates. Try again.")
+
+    else:
+        st.info(
+            "Waiting for location permission. "
+            "Please allow location access in your browser."
+        )
         location = get_geolocation()
 
         if location:
